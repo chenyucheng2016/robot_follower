@@ -23,6 +23,7 @@ class RosbotFollower:
 		self.gotopt = 0
 		self.init_pose = np.zeros((3,1))
 		self.on_off = 0
+		self.on_off_final_class = 0
 		#self.prev_pose = self.robot_pose
 
 		# wait one second to give subscriber time to connect
@@ -70,6 +71,12 @@ class RosbotFollower:
 
 		if distance <= closeEnough and abs(current_theta - desiredAngle) < error_angle and self.gotopt == n:
 			#all waypoints are clear
+			if self.on_off_final_class == 0:
+				target_feature_level = init_feature_level[self.gotopt]
+				target_feature = init_feature[self.gotopt]
+				num_measure = measurements_to_make[self.gotopt]
+				self.key_pressed.publish(num_measure.astype(np.int32)*19 + target_feature.astype(np.int32))
+				self.on_off_final_class = 1
 			print('All waypoints are done')
 			vel_msg.linear.x = 0.0
 			vel_msg.angular.z = 0.0
