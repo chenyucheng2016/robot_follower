@@ -52,14 +52,15 @@ class RosbotFollower:
 		wheel2Center = 23.5/200
 		closeEnough = 0.08
 		waypoints = np.array([[2.4, 0.0, 0.0], 
-			                  [2.4, 1, np.pi/2]])
+			                  [2.4, 1.2, np.pi/2],
+			                  [5.5, 1.2, np.pi/2]])
 
 		#1:0:"Object",1:"Box", 2:"Sphere", 3:"BrownBox", 4:"BlackBox", 5:"OrangeSphere", 6:"GreenSphere", 7:"CardboardBox", 8:"WoodenBox", 
         #9:"Computer", 10:"Book", 11:"Orange", 12:"Basketball", 13:"Watermelon",14:"Apple"}
 		#The following three sets of parameters should be carefully tuned
-		init_feature = np.array([0,0])
-		init_feature_level = np.array([0,0])
-		measurements_to_make = np.array([2,2])
+		init_feature = np.array([0,0,0])
+		init_feature_level = np.array([0,0,0])
+		measurements_to_make = np.array([2,2,2])
 		desiredV, desiredW, distance, current_theta = self.visitWaypoints(self.gotopt, waypoints, e, robot_pose)
 		cmdV, cmdW = self.limitCmds(desiredV, desiredW, maxV, wheel2Center)
 		n = len(waypoints) - 1
@@ -111,13 +112,13 @@ class RosbotFollower:
 						self.gotopt = self.gotopt + 1
 				else:
 					#go forward
-					vel_msg.linear.x = 1.2*cmdV
+					vel_msg.linear.x = 1.4*cmdV
 					vel_msg.angular.z = 0.0		
 
 		self.velocity_publisher.publish(vel_msg)
 			
 	def angleControl(self, desiredAngle, cur_theta):
-		cmdW = (desiredAngle - cur_theta)*0.03
+		cmdW = (desiredAngle - cur_theta)*0.06
 		if abs(desiredAngle - cur_theta) > np.pi:
 			cmdW = -cmdW
 		return cmdW
