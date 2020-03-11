@@ -46,26 +46,37 @@ class RosbotFollower:
 			self.init_pose = robot_pose;
 			self.on_off = 1
 		e = 0.4
-		error_angle = 0.05
+		error_angle = 0.01
 		kp = 2
 		maxV = 0.09
 		wheel2Center = 23.5/200
-		closeEnough = 0.08
-		waypoints = np.array([[2.4, 0.0, 0.0], 
-			                  [2.4, 1.2, np.pi/2],
-			                  [5.5, 1.2, np.pi/2]])
+		closeEnough = 0.03
+		waypoints = np.array([[1, -0.2, 0.0], #check
+			                  [1.4, 2.1, np.pi/2],#check
+			                  [-0.7, 2.9, np.pi/2],#check
+			                  [0.3,3.9,np.pi/2],#check
+			                  [2.7,4.1,0],#check
+			                  [3.8,3.0,0],#check
+			                  [5.9,3.7,0],#check
+			                  [5.5,2.6,3*np.pi/2+0.15],#check
+			                  [3.7,2.4,np.pi+0.1],#
+			                  [3.1,2.0,3*np.pi/2],
+			                  [5.6,0.7,3*np.pi/2],
+			                  [4.6,0.2,3*np.pi/2+0.22]])
 
 		#1:0:"Object",1:"Box", 2:"Sphere", 3:"BrownBox", 4:"BlackBox", 5:"OrangeSphere", 6:"GreenSphere", 7:"CardboardBox", 8:"WoodenBox", 
         #9:"Computer", 10:"Book", 11:"Orange", 12:"Basketball", 13:"Watermelon",14:"Apple"}
 		#The following three sets of parameters should be carefully tuned
-		init_feature = np.array([0,0,0])
-		init_feature_level = np.array([0,0,0])
-		measurements_to_make = np.array([2,2,2])
+		init_feature = np.array([0,0,0,0,0,0,0,0,0,0,0,0])
+		init_feature_level = np.array([0,0,0,0,0,0,0,0,0,0,0,0])
+		measurements_to_make = np.array([2,2,2,2,2,2,2,2,2,2,2,2])
 		desiredV, desiredW, distance, current_theta = self.visitWaypoints(self.gotopt, waypoints, e, robot_pose)
 		cmdV, cmdW = self.limitCmds(desiredV, desiredW, maxV, wheel2Center)
 		n = len(waypoints) - 1
 		vel_msg = Twist()
 		desiredPose = waypoints[self.gotopt]
+		#print('Desired pose',desiredPose)
+		#print('robot_pose',robot_pose)
 		orient = self.toWholeAngle(np.arctan2(desiredPose[1] - robot_pose[1], desiredPose[0] - robot_pose[0]))
 		desiredAngle = waypoints[self.gotopt][2]
 		desiredAngle = self.toWholeAngle(desiredAngle)
@@ -82,8 +93,8 @@ class RosbotFollower:
 			vel_msg.linear.x = 0.0
 			vel_msg.angular.z = 0.0
 		else:
-			if distance > (closeEnough + 0.25) and abs(self.toWholeAngle(current_theta) - orient) > 0.18 and abs(self.toWholeAngle(current_theta) - orient) < 6.10:
-				#In this branch the robot rotates so that it points the waypoinb to go
+			if distance > (closeEnough + 0.25) and abs(self.toWholeAngle(current_theta) - orient) > 3*error_angle and abs(self.toWholeAngle(current_theta) - orient) < (2*np.pi - 3*error_angle):
+				#In this branch the robot rotates so that it points the waypoint to go
 				#print('Diff orient',abs(self.toWholeAngle(current_theta) - orient))
 				cmdW = self.angleControl(orient,current_theta)
 				#print('cmdW in orient',cmdW)
@@ -107,7 +118,7 @@ class RosbotFollower:
 						target_feature = init_feature[self.gotopt]
 						num_measure = measurements_to_make[self.gotopt]
 						self.key_pressed.publish(num_measure.astype(np.int32)*19 + target_feature.astype(np.int32))
-						time.sleep(10)
+						time.sleep(1)
 						print("Let's continue ")
 						self.gotopt = self.gotopt + 1
 				else:
