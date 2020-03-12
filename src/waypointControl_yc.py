@@ -53,7 +53,7 @@ class RosbotFollower:
 		closeEnough = 0.03
 		waypoints = np.array([[1, -0.2, 0.0], #check
 			                  [1.4, 2.1, np.pi/2],#check
-			                  [-0.7, 2.9, np.pi/2],#check
+			                  [-0.7, 2.9, np.pi],#check
 			                  [0.3,3.9,np.pi/2],#check
 			                  [2.7,4.1,0],#check
 			                  [3.8,3.0,0],#check
@@ -61,15 +61,15 @@ class RosbotFollower:
 			                  [5.5,2.6,3*np.pi/2+0.15],#check
 			                  [3.7,2.4,np.pi+0.1],#
 			                  [3.1,2.0,3*np.pi/2],
-			                  [5.6,0.7,3*np.pi/2],
-			                  [4.6,0.2,3*np.pi/2+0.22]])
+			                  [5.6,0.7,3*np.pi/2+0.20],
+			                  [4.6,0.2,3*np.pi/2+0.25]])
 
 		#1:0:"Object",1:"Box", 2:"Sphere", 3:"BrownBox", 4:"BlackBox", 5:"OrangeSphere", 6:"GreenSphere", 7:"CardboardBox", 8:"WoodenBox", 
         #9:"Computer", 10:"Book", 11:"Orange", 12:"Basketball", 13:"Watermelon",14:"Apple"}
 		#The following three sets of parameters should be carefully tuned
-		init_feature = np.array([0,0,0,0,0,0,0,0,0,0,0,0])
-		init_feature_level = np.array([0,0,0,0,0,0,0,0,0,0,0,0])
-		measurements_to_make = np.array([2,2,2,2,2,2,2,2,2,2,2,2])
+		init_feature = np.array([2,-1,0,0,14,11,1,2,-1,8,0])
+		init_feature_level = np.array([1,-1,0,0,3,3,1,1,-1,3,0])
+		measurements_to_make = np.array([1,-1,3,3,0,0,2,2,2,-1,0,3])
 		desiredV, desiredW, distance, current_theta = self.visitWaypoints(self.gotopt, waypoints, e, robot_pose)
 		cmdV, cmdW = self.limitCmds(desiredV, desiredW, maxV, wheel2Center)
 		n = len(waypoints) - 1
@@ -117,8 +117,9 @@ class RosbotFollower:
 						target_feature_level = init_feature_level[self.gotopt]
 						target_feature = init_feature[self.gotopt]
 						num_measure = measurements_to_make[self.gotopt]
-						self.key_pressed.publish(num_measure.astype(np.int32)*19 + target_feature.astype(np.int32))
-						time.sleep(1)
+						if target_feature_level != -1:
+							self.key_pressed.publish(num_measure.astype(np.int32)*19 + target_feature.astype(np.int32))
+							time.sleep(6)
 						print("Let's continue ")
 						self.gotopt = self.gotopt + 1
 				else:
